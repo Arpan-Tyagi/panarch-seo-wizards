@@ -1,0 +1,37 @@
+{
+  "name": "panarch-seo-wizards",
+  "version": "1.0.0",
+  "description": "Four zero-dependency command-line SEO checks from Panarch Digital's free Zero to Revenue SEO course: crawl and indexing, on-page, programmatic pages, and Core Web Vitals.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Arpan Tyagi, Panarch Digital (https://panarchdigital.com)",
+  "homepage": "https://panarchdigital.com/resources",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arpan-Tyagi/panarch-seo-wizards.git"
+  },
+  "bin": {
+    "seo-wizard": "bin/seo-wizard.mjs",
+    "onpage-wizard": "bin/onpage-wizard.mjs",
+    "programmatic-wizard": "bin/programmatic-wizard.mjs",
+    "cwv-wizard": "bin/cwv-wizard.mjs"
+  },
+  "files": [
+    "bin",
+    "lib"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "keywords": [
+    "seo",
+    "core-web-vitals",
+    "programmatic-seo",
+    "robots-txt",
+    "sitemap",
+    "cli"
+  ]
+}
