@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Episode 1 (How Google Works): can Google reach, read and index this site?
 import {
-  banner, stage, createReport, parseArgs, fetchPage, metaContent, linkHref,
-  elements, head, tags, c,
+  banner, stage, createReport, parseArgs, fetchPage, loadPage, metaContent, linkHref,
+  elements, head, tags, parseRobots, groupFor, c,
 } from "../lib/core.mjs";
 
 const USAGE = `Usage: seo-wizard <url> [--fail-under N]
@@ -21,14 +21,7 @@ banner("SEO PRE-FLIGHT WIZARD (EPISODE 1)", target);
 
 // 1. Domain and protocol ──────────────────────────────────────────────────────
 stage("1. Domain, HTTPS and redirects");
-let page;
-try {
-  page = await fetchPage(target);
-} catch (err) {
-  r.fail(`Could not connect: ${err.message}`, "Check the domain's DNS records and that the site is live.", 60);
-  r.finish("SEO PRE-FLIGHT SCORE", flags);
-  process.exit(process.exitCode ?? 1);
-}
+const page = await loadPage(target);
 
 if (page.status === 200) r.pass(`Page responds with HTTP 200 (${page.headerMs}ms to first response).`);
 else r.fail(`Page returned HTTP ${page.status}.`, `Make ${target} return 200 OK.`, 25);
@@ -150,37 +143,3 @@ else
 
 r.finish("SEO PRE-FLIGHT SCORE", flags);
 console.log(c.dim(`Next: search Google for site:${host}, and inspect a page in Search Console's URL Inspection.\n`));
-
-// ── robots.txt parsing ───────────────────────────────────────────────────────
-function parseRobots(text) {
-  const groups = [];
-  let current = null;
-  let lastWasAgent = false;
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.replace(/#.*/, "").trim();
-    const m = line.match(/^([a-z-]+)\s*:\s*(.*)$/i);
-    if (!m) continue;
-    const key = m[1].toLowerCase();
-    const value = m[2].trim();
-    if (key === "user-agent") {
-      if (!lastWasAgent) groups.push((current = { agents: [], allow: [], disallow: [] }));
-      current.agents.push(value.toLowerCase());
-      lastWasAgent = true;
-    } else {
-      lastWasAgent = false;
-      if (!current) continue;
-      if (key === "allow" && value) current.allow.push(value);
-      if (key === "disallow" && value) current.disallow.push(value);
-    }
-  }
-  return groups;
-}
-
-function groupFor(groups, agent) {
-  const hits = groups.filter((g) => g.agents.includes(agent));
-  if (!hits.length) return null;
-  return {
-    allow: hits.flatMap((g) => g.allow),
-    disallow: hits.flatMap((g) => g.disallow),
-  };
-}

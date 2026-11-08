@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Episode 4 (Speed & Core Web Vitals): real-user field data plus page-level speed hazards.
 import {
-  banner, stage, createReport, parseArgs, fetchPage, tags, head, c,
+  banner, stage, createReport, parseArgs, loadPage, tags, head, c,
 } from "../lib/core.mjs";
 
 const USAGE = `Usage: cwv-wizard <url> [--no-psi] [--fail-under N]
@@ -19,6 +19,8 @@ const { urls, flags } = parseArgs(process.argv.slice(2), USAGE);
 const target = urls[0];
 const r = createReport();
 banner("CORE WEB VITALS WIZARD (EPISODE 4)", target);
+// Load the page first, so a wrong URL stops before the slow PageSpeed Insights call.
+const page = await loadPage(target);
 
 // 1. Field data ───────────────────────────────────────────────────────────────
 stage("1. Real-user Core Web Vitals (Chrome UX Report, mobile, 75th percentile)");
@@ -30,13 +32,6 @@ if (flags["no-psi"]) {
 
 // 2. HTML hazards ─────────────────────────────────────────────────────────────
 stage("2. Speed hazards in the HTML");
-let page;
-try {
-  page = await fetchPage(target);
-} catch (err) {
-  console.error(`Could not fetch ${target}: ${err.message}`);
-  process.exit(1);
-}
 const html = page.body;
 const kb = Buffer.byteLength(html, "utf8") / 1024;
 

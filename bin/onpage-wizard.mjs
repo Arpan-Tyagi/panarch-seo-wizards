@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Episode 2 (The Anatomy of a Perfect Web Page): on-page checks for one URL.
 import {
-  banner, stage, createReport, parseArgs, fetchPage, metaContent, linkHref,
+  banner, stage, createReport, parseArgs, loadPage, metaContent, linkHref,
   elements, head, tags, jsonLdBlocks, schemaTypes, sameSite,
 } from "../lib/core.mjs";
 
@@ -18,13 +18,7 @@ const target = urls[0];
 const r = createReport();
 banner("ON-PAGE WIZARD (EPISODE 2)", target);
 
-let page;
-try {
-  page = await fetchPage(target);
-} catch (err) {
-  console.error(`Could not fetch ${target}: ${err.message}`);
-  process.exit(1);
-}
+const page = await loadPage(target);
 if (page.status !== 200) r.fail(`Page returned HTTP ${page.status}.`, "Audit a live page that returns 200.", 20);
 
 const html = page.body;

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Episode 3 (Programmatic Scaling): is a templated page unique enough to stand on its own?
 import {
-  banner, stage, createReport, parseArgs, fetchPage, linkHref, bodyText,
+  banner, stage, createReport, parseArgs, loadPage, linkHref, bodyText,
   jsonLdBlocks, schemaTypes, stripTrailingSlash, c,
 } from "../lib/core.mjs";
 
@@ -21,15 +21,7 @@ banner("PROGRAMMATIC PAGE WIZARD (EPISODE 3)", urls.join("  "));
 
 const pages = [];
 for (const url of urls) {
-  try {
-    pages.push({ url, ...(await fetchPage(url)) });
-  } catch (err) {
-    r.fail(`Could not fetch ${url}: ${err.message}`, `Make ${url} reachable.`, 20);
-  }
-}
-if (!pages.length) {
-  r.finish("PROGRAMMATIC PAGE SCORE", flags);
-  process.exit(process.exitCode ?? 1);
+  pages.push({ url, ...(await loadPage(url)) });
 }
 
 const first = pages[0];

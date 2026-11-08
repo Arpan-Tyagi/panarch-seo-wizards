@@ -34,7 +34,7 @@ before(async () => {
     };
     switch (req.url) {
       case "/robots.txt":
-        return send(200, "text/plain", `User-agent: *\nDisallow: /_next/\n\nSitemap: ${base}/sitemap.xml\n`);
+        return send(200, "text/plain", `User-agent: *\nDisallow: /_next/\n\nUser-agent: GPTBot\nUser-agent: PerplexityBot\nDisallow: /\n\nSitemap: ${base}/sitemap.xml\n`);
       case "/sitemap.xml":
         return send(200, "application/xml", `<urlset><url><loc>${base}/good</loc></url></urlset>`);
       case "/good":
@@ -52,6 +52,24 @@ before(async () => {
           canonical: false,
           body: `<h2>x</h2><h4>skip</h4><img src="/a.jpg" loading="lazy"><a href="/x">click here</a>`,
         }, url));
+      case "/entity": {
+        const graph = {
+          "@context": "https://schema.org",
+          "@graph": [
+            { "@type": "Organization", "@id": `${base}/#org`, name: "Example Boots", sameAs: ["https://www.linkedin.com/company/x", "https://www.instagram.com/x", "https://github.com/x"] },
+            { "@type": "Product", "@id": `${base}/entity#product`, name: "Boot", brand: { "@id": `${base}/#org` } },
+          ],
+        };
+        const answer = "Goodyear welted boots can be resoled several times because the sole is stitched to a leather welt rather than glued, so a cobbler can replace it without touching the upper.";
+        const nav = Array.from({ length: 12 }, (_, i) => `<a href="/guide-${i}">boot care guide ${i}</a>`).join("");
+        return send(200, "text/html", page({
+          title: "Example", desc: "d", h1s: ["Boots"],
+          body: `<nav aria-label="breadcrumb"><a href="/">Home</a></nav>${nav}<p>${answer}</p><p>${answer}</p>
+                 <a href="/research/heel-wear">heel wear study</a><a href="/contact">contact</a><a href="mailto:press@example.com">press@example.com</a>
+                 <a href="https://partner.example/" rel="sponsored">partner</a>
+                 <script type="application/ld+json">${JSON.stringify(graph)}</script>`,
+        }, url));
+      }
       case "/locations/a":
       case "/locations/b":
         return send(200, "text/html", page({ title: "City page", desc: "d", h1s: ["City"], body: `<p>${shared}</p>` }, url));
@@ -76,12 +94,30 @@ function run(bin, args) {
 }
 
 const score = (out) => Number(out.match(/SCORE: (\d+) \/ 100/)[1]);
+const ALL = ["seo-wizard.mjs", "onpage-wizard.mjs", "programmatic-wizard.mjs", "cwv-wizard.mjs", "geo-wizard.mjs", "cluster-wizard.mjs", "pr-wizard.mjs"];
 
 test("every wizard prints usage and exits 2 without a URL", async () => {
-  for (const bin of ["seo-wizard.mjs", "onpage-wizard.mjs", "programmatic-wizard.mjs", "cwv-wizard.mjs"]) {
+  for (const bin of ALL) {
     const { code, out } = await run(bin, []);
     assert.equal(code, 2, bin);
     assert.match(out, /Usage:/);
+  }
+});
+
+test("every wizard stops without a score on an error page, a non-HTML file or an unreachable host", async () => {
+  const cases = [
+    [`${base}/missing`, /returned HTTP 404/],
+    [`${base}/robots.txt`, /not an HTML page/],
+    ["http://127.0.0.1:1/", /Could not reach/],
+  ];
+  for (const bin of ALL) {
+    for (const [url, message] of cases) {
+      const { code, out } = await run(bin, [url, "--no-psi"]);
+      assert.equal(code, 1, `${bin} ${url}`);
+      assert.match(out, message, `${bin} ${url}`);
+      assert.doesNotMatch(out, /SCORE:/, `${bin} ${url}`);
+      assert.doesNotMatch(out, /Assertion failed/, `${bin} ${url}`);
+    }
   }
 });
 
@@ -123,4 +159,39 @@ test("cwv-wizard flags a lazy-loaded first image and honours --fail-under", asyn
   const good = await run("cwv-wizard.mjs", [`${base}/good`, "--no-psi"]);
   assert.equal(good.code, 0);
   assert.match(good.out, /reserve their space/);
+});
+
+test("geo-wizard reads the @graph, sameAs and AI crawler rules", async () => {
+  const good = await run("geo-wizard.mjs", [`${base}/entity`]);
+  assert.match(good.out, /Uses one connected @graph/);
+  assert.match(good.out, /Nodes are linked by @id/);
+  assert.match(good.out, /"Example Boots" lists 3 sameAs/);
+  assert.match(good.out, /PerplexityBot is blocked from the whole site/);
+  assert.match(good.out, /Training crawlers blocked: GPTBot/);
+  assert.match(good.out, /2 short paragraphs/);
+  const bad = await run("geo-wizard.mjs", [`${base}/bad`]);
+  assert.match(bad.out, /No JSON-LD on this page/);
+  assert.ok(score(bad.out) < score(good.out));
+});
+
+test("cluster-wizard counts internal links, generic anchors and breadcrumbs", async () => {
+  const good = await run("cluster-wizard.mjs", [`${base}/entity`]);
+  assert.match(good.out, /Links to 1[0-9] different pages/);
+  assert.match(good.out, /Breadcrumbs found \(on the page\)/);
+  const bad = await run("cluster-wizard.mjs", [`${base}/bad`]);
+  assert.match(bad.out, /say only "click here"/);
+  assert.match(bad.out, /No breadcrumbs found/);
+  assert.ok(score(bad.out) < score(good.out));
+});
+
+test("pr-wizard finds sameAs links, a research page and a press contact", async () => {
+  const good = await run("pr-wizard.mjs", [`${base}/entity`]);
+  assert.match(good.out, /3 sameAs profile link/);
+  assert.match(good.out, /\/research\/heel-wear/);
+  assert.match(good.out, /contact or press page link and an email/);
+  assert.match(good.out, /1 carry rel="sponsored"/);
+  assert.match(good.out, /cannot see your backlinks/);
+  const bad = await run("pr-wizard.mjs", [`${base}/bad`]);
+  assert.match(bad.out, /No sameAs links/);
+  assert.ok(score(bad.out) < score(good.out));
 });

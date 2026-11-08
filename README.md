@@ -1,6 +1,6 @@
 # Panarch SEO Wizards
 
-Four small command-line checks that go with Panarch Digital's free **Zero to Revenue SEO** course. Each one fetches a live page and prints a plain-English checklist with a fix list.
+Seven small command-line checks that go with Panarch Digital's free **Zero to Revenue SEO** course. Each one fetches a live page and prints a plain-English checklist with a fix list.
 
 | Wizard | Course episode | What it checks |
 |---|---|---|
@@ -8,6 +8,9 @@ Four small command-line checks that go with Panarch Digital's free **Zero to Rev
 | `onpage-wizard` | [2. The Anatomy of a Perfect Web Page](https://panarchdigital.com/blog/zero-to-revenue-seo-on-page-perfect-page) | Title and meta description length, H1 and heading order, image alt text, generic "click here" anchors, Open Graph tags, canonical, JSON-LD |
 | `programmatic-wizard` | [3. Programmatic Scaling](https://panarchdigital.com/blog/zero-to-revenue-seo-programmatic-scaling) | Clean URLs, self-referencing canonicals, schema, breadcrumbs, and how much text sibling pages share |
 | `cwv-wizard` | [4. Speed & Core Web Vitals](https://panarchdigital.com/blog/zero-to-revenue-seo-speed-core-web-vitals) | Real-user LCP, INP and CLS from the Chrome UX Report (via the free PageSpeed Insights API), plus HTML speed hazards |
+| `geo-wizard` | [5. GEO & Entity Schema](https://panarchdigital.com/blog/zero-to-revenue-seo-geo-ai-overviews-schema) | One connected JSON-LD `@graph` with `@id` links, Organization and `sameAs`, AI search crawler access in robots.txt, the optional `/llms.txt`, short answer paragraphs |
+| `cluster-wizard` | [6. Topic Clusters & Internal Linking](https://panarchdigital.com/blog/zero-to-revenue-seo-topical-clusters-internal-linking) | Internal links on the page, generic "read more" anchors, breadcrumbs (on the page or as BreadcrumbList schema) |
+| `pr-wizard` | [7. Authority & Digital PR](https://panarchdigital.com/blog/zero-to-revenue-seo-authority-digital-pr-backlinks) | `sameAs` profile links, a link to a research or data page, a press contact, and outbound link attributes (it cannot see your backlinks) |
 
 No dependencies. Needs [Node.js](https://nodejs.org) 18.17 or newer.
 
@@ -29,6 +32,18 @@ npx --package=github:Arpan-Tyagi/panarch-seo-wizards programmatic-wizard https:/
 npx --package=github:Arpan-Tyagi/panarch-seo-wizards cwv-wizard https://yourdomain.com
 ```
 
+```bash
+npx --package=github:Arpan-Tyagi/panarch-seo-wizards geo-wizard https://yourdomain.com
+```
+
+```bash
+npx --package=github:Arpan-Tyagi/panarch-seo-wizards cluster-wizard https://yourdomain.com/blog/your-pillar
+```
+
+```bash
+npx --package=github:Arpan-Tyagi/panarch-seo-wizards pr-wizard https://yourdomain.com
+```
+
 ## Or clone and run
 
 ```bash
@@ -42,6 +57,8 @@ node bin/seo-wizard.mjs https://yourdomain.com
 - `--fail-under N`: exit with code 1 when the score is below N, for use in CI before a deploy.
 - `--no-psi` (`cwv-wizard` only): skip the PageSpeed Insights call. Set `PSI_API_KEY` for higher rate limits.
 - `NO_COLOR=1`: plain output.
+
+If the page cannot be reached, returns an error status (such as 404) or is not an HTML page, the wizard stops with a message and exit code 1 instead of scoring it.
 
 ## What the score means
 
