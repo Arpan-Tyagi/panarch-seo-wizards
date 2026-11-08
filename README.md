@@ -60,6 +60,24 @@ node bin/seo-wizard.mjs https://yourdomain.com
 
 If the page cannot be reached, returns an error status (such as 404) or is not an HTML page, the wizard stops with a message and exit code 1 instead of scoring it.
 
+## Repository layout
+
+```
+bin/       One executable per wizard (seo, onpage, programmatic, cwv, geo, cluster, pr)
+lib/       core.mjs: the shared fetching, HTML parsing, scoring and report code
+test/      wizards.test.mjs: runs every wizard against a local test server
+```
+
+Each wizard in `bin/` is a short script: it loads the page, runs its checks and prints a report through `lib/core.mjs`. To add a wizard, create `bin/<name>-wizard.mjs`, register it under `bin` in `package.json`, add a row to the table above and a test.
+
+## Development
+
+```bash
+npm test    # node --test, no dependencies to install
+```
+
+The tests start a local server with good and bad example pages, so they need no network access.
+
 ## What the score means
 
 The score is this tool's own checklist, out of 100. It is **not** a Google ranking signal, and a perfect score does not guarantee rankings. Google's own tools have the final word: [Search Console](https://search.google.com/search-console), [PageSpeed Insights](https://pagespeed.web.dev) and the [Rich Results Test](https://search.google.com/test/rich-results).
