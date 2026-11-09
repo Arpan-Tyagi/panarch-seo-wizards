@@ -70,6 +70,14 @@ before(async () => {
                  <script type="application/ld+json">${JSON.stringify(graph)}</script>`,
         }, url));
       }
+      case "/sxo":
+        return send(200, "text/html", page({
+          title: "SXO Product", desc: "desc", h1s: ["Product"],
+          body: `<div class="fixed-bottom"><button>Buy Now</button></div>
+                 <script src="https://www.googletagmanager.com/gtag/js"></script>`,
+        }, url));
+      case "/sxo-bad":
+        return send(200, "text/html", `<!doctype html><html><head><title>Bad</title></head><body>${Array.from({length: 12}, (_, i) => `<input name="f${i}">`).join("")}</body></html>`);
       case "/locations/a":
       case "/locations/b":
         return send(200, "text/html", page({ title: "City page", desc: "d", h1s: ["City"], body: `<p>${shared}</p>` }, url));
@@ -94,7 +102,16 @@ function run(bin, args) {
 }
 
 const score = (out) => Number(out.match(/SCORE: (\d+) \/ 100/)[1]);
-const ALL = ["seo-wizard.mjs", "onpage-wizard.mjs", "programmatic-wizard.mjs", "cwv-wizard.mjs", "geo-wizard.mjs", "cluster-wizard.mjs", "pr-wizard.mjs"];
+const ALL = [
+  "seo-wizard.mjs",
+  "onpage-wizard.mjs",
+  "programmatic-wizard.mjs",
+  "cwv-wizard.mjs",
+  "geo-wizard.mjs",
+  "cluster-wizard.mjs",
+  "pr-wizard.mjs",
+  "sxo-wizard.mjs",
+];
 
 test("every wizard prints usage and exits 2 without a URL", async () => {
   for (const bin of ALL) {
@@ -195,3 +212,14 @@ test("pr-wizard finds sameAs links, a research page and a press contact", async 
   assert.match(bad.out, /No sameAs links/);
   assert.ok(score(bad.out) < score(good.out));
 });
+
+test("sxo-wizard flags missing viewport and form friction", async () => {
+  const good = await run("sxo-wizard.mjs", [`${base}/sxo`]);
+  assert.match(good.out, /Mobile viewport configured/);
+  assert.match(good.out, /Detected bottom-anchored sticky or fixed CTA/);
+  const bad = await run("sxo-wizard.mjs", [`${base}/sxo-bad`]);
+  assert.match(bad.out, /Missing or invalid mobile viewport/);
+  assert.match(bad.out, /Heavy form friction/);
+  assert.ok(score(bad.out) < score(good.out));
+});
+

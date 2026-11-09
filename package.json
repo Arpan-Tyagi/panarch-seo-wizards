@@ -1,7 +1,7 @@
 {
   "name": "panarch-seo-wizards",
-  "version": "1.1.0",
-  "description": "Seven zero-dependency command-line SEO checks from Panarch Digital's free Zero to Revenue SEO course: crawl and indexing, on-page, programmatic pages, Core Web Vitals, entity schema and AI search, internal linking, and digital PR.",
+  "version": "1.2.0",
+  "description": "Eight zero-dependency command-line SEO checks from Panarch Digital's free Zero to Revenue SEO course: crawl and indexing, on-page, programmatic pages, Core Web Vitals, entity schema and AI search, internal linking, digital PR, and search experience optimization (SXO).",
   "type": "module",
   "license": "MIT",
   "author": "Arpan Tyagi, Panarch Digital (https://panarchdigital.com)",
@@ -17,7 +17,8 @@
     "cwv-wizard": "bin/cwv-wizard.mjs",
     "geo-wizard": "bin/geo-wizard.mjs",
     "cluster-wizard": "bin/cluster-wizard.mjs",
-    "pr-wizard": "bin/pr-wizard.mjs"
+    "pr-wizard": "bin/pr-wizard.mjs",
+    "sxo-wizard": "bin/sxo-wizard.mjs"
   },
   "files": [
     "bin",

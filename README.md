@@ -1,6 +1,6 @@
 # Panarch SEO Wizards
 
-Seven small command-line checks that go with Panarch Digital's free **Zero to Revenue SEO** course. Each one fetches a live page and prints a plain-English checklist with a fix list.
+Eight small command-line checks that go with Panarch Digital's free **Zero to Revenue SEO** course. Each one fetches a live page and prints a plain-English checklist with a fix list.
 
 | Wizard | Course episode | What it checks |
 |---|---|---|
@@ -11,6 +11,7 @@ Seven small command-line checks that go with Panarch Digital's free **Zero to Re
 | `geo-wizard` | [5. GEO & Entity Schema](https://panarchdigital.com/blog/zero-to-revenue-seo-geo-ai-overviews-schema) | One connected JSON-LD `@graph` with `@id` links, Organization and `sameAs`, AI search crawler access in robots.txt, the optional `/llms.txt`, short answer paragraphs |
 | `cluster-wizard` | [6. Topic Clusters & Internal Linking](https://panarchdigital.com/blog/zero-to-revenue-seo-topical-clusters-internal-linking) | Internal links on the page, generic "read more" anchors, breadcrumbs (on the page or as BreadcrumbList schema) |
 | `pr-wizard` | [7. Authority & Digital PR](https://panarchdigital.com/blog/zero-to-revenue-seo-authority-digital-pr-backlinks) | `sameAs` profile links, a link to a research or data page, a press contact, and outbound link attributes (it cannot see your backlinks) |
+| `sxo-wizard` | [8. The Cash Register (SXO)](https://panarchdigital.com/blog/zero-to-revenue-seo-sxo-conversion-rate-revenue) | Mobile viewport meta tags, sticky thumb-zone purchase targets, form input field count, and conversion analytics / Microsoft Clarity tracking |
 
 No dependencies. Needs [Node.js](https://nodejs.org) 18.17 or newer.
 
@@ -42,6 +43,10 @@ npx --package=github:Arpan-Tyagi/panarch-seo-wizards cluster-wizard https://your
 
 ```bash
 npx --package=github:Arpan-Tyagi/panarch-seo-wizards pr-wizard https://yourdomain.com
+```
+
+```bash
+npx --package=github:Arpan-Tyagi/panarch-seo-wizards sxo-wizard https://yourdomain.com
 ```
 
 ## Or clone and run
